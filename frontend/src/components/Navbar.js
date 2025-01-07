@@ -15,7 +15,7 @@ const Navbar = () => {
             justifyContent: 'flex-start', // Align items to the left
             flexGrow: 1,
             gap: 2, // Spacing between buttons
-            ml: '10%', // Add left margin to position the tabs slightly left
+            ml: '15%', // Add left margin to position the tabs slightly left
           }}
         >
           <Button component={Link} to="/" color="inherit">
