@@ -6,10 +6,17 @@ const Navbar = () => {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" sx={{ flexGrow: 1, textAlign: 'left' }}>
           CertiChain
         </Typography>
-        <Box>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            flexGrow: 1,
+            gap: 2, // Spacing between buttons
+          }}
+        >
           <Button component={Link} to="/" color="inherit">
             Home
           </Button>
