@@ -1,73 +1,75 @@
 import React, { useState } from 'react';
+import { Box, TextField, Button, Typography, Alert, CircularProgress } from '@mui/material';
 
 const VerifyCertificate = () => {
-  const [certificateId, setCertificateId] = useState('');
-  const [verificationResult, setVerificationResult] = useState(null);
+  const [certificateID, setCertificateID] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState(null);
 
-  const handleChange = (e) => {
-    setCertificateId(e.target.value);
-  };
-
-  const handleVerify = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!certificateId) {
-      alert('Please enter a certificate ID.');
-      return;
-    }
+    setIsLoading(true);
+    setResult(null);
 
     try {
-      const response = await fetch('http://localhost:5000/chain');
-      const data = await response.json();
-
-      const certificate = data.chain
-        .flatMap((block) => block.data)
-        .find((record) => record.certificate === certificateId);
-
-      if (certificate) {
-        setVerificationResult({
-          status: 'Valid',
-          owner: certificate.owner,
-          institution: certificate.institution,
-        });
-      } else {
-        setVerificationResult({ status: 'Invalid' });
+      const response = await fetch(`http://localhost:5000/verify_certificate?certificate=${certificateID}`);
+      if (!response.ok) {
+        throw new Error('Verification failed');
       }
+
+      const data = await response.json();
+      setResult(data.valid ? 'Certificate is valid!' : 'Certificate is invalid.');
     } catch (error) {
-      console.error('Error verifying certificate:', error);
-      alert('Error verifying the certificate. Please try again later.');
+      setResult('Error verifying certificate. Please try again.');
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div>
-      <h2>Verify Certificate</h2>
-      <form onSubmit={handleVerify}>
-        <input
-          type="text"
-          placeholder="Enter Certificate ID"
-          value={certificateId}
-          onChange={handleChange}
+    <Box
+      sx={{
+        maxWidth: 500,
+        margin: 'auto',
+        mt: 5,
+        p: 3,
+        border: '1px solid #ccc',
+        borderRadius: 2,
+        boxShadow: 3,
+      }}
+    >
+      <Typography variant="h4" sx={{ mb: 2, textAlign: 'center' }}>
+        Verify Certificate
+      </Typography>
+
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label="Certificate ID"
+          value={certificateID}
+          onChange={(e) => setCertificateID(e.target.value)}
+          fullWidth
           required
+          sx={{ mb: 2 }}
         />
-        <button type="submit">Verify</button>
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          disabled={isLoading}
+        >
+          {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Verify Certificate'}
+        </Button>
       </form>
 
-      {verificationResult && (
-        <div>
-          <h3>Verification Result</h3>
-          {verificationResult.status === 'Valid' ? (
-            <p>
-              <strong>Status:</strong> {verificationResult.status} <br />
-              <strong>Owner:</strong> {verificationResult.owner} <br />
-              <strong>Institution:</strong> {verificationResult.institution}
-            </p>
-          ) : (
-            <p><strong>Status:</strong> {verificationResult.status}</p>
-          )}
-        </div>
+      {result && (
+        <Alert severity={result.includes('valid') ? 'success' : 'error'} sx={{ mt: 2 }}>
+          {result}
+        </Alert>
       )}
-    </div>
+    </Box>
   );
 };
 

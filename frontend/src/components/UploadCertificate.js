@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Box, TextField, Button, Typography, Alert, CircularProgress } from '@mui/material';
 
 const UploadCertificate = () => {
   const [formData, setFormData] = useState({
@@ -6,83 +7,110 @@ const UploadCertificate = () => {
     institution: '',
     certificate: '',
   });
-  const [isLoading, setIsLoading] = useState(false); // Loading state
-  const [errorMessage, setErrorMessage] = useState(null); // Error message
-  const [successMessage, setSuccessMessage] = useState(null); // Success message
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
-  // Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Start loading
-    setErrorMessage(null); // Reset error message
-    setSuccessMessage(null); // Reset success message
+    setIsLoading(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
 
     try {
-      // Log formData for debugging
-      console.log('Submitting form data:', formData);
-
-      // Make API request
       const response = await fetch('http://localhost:5000/add_certificate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      // Check for HTTP errors
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      setSuccessMessage(data.message); // Display success message
+      setSuccessMessage(data.message);
     } catch (error) {
-      console.error('Error uploading certificate:', error);
       setErrorMessage('Failed to upload certificate. Please try again.');
+      console.error('Error:', error);
     } finally {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
     }
   };
 
   return (
-    <div>
-      <h2>Upload Certificate</h2>
+    <Box
+      sx={{
+        maxWidth: 500,
+        margin: 'auto',
+        mt: 5,
+        p: 3,
+        border: '1px solid #ccc',
+        borderRadius: 2,
+        boxShadow: 3,
+      }}
+    >
+      <Typography variant="h4" sx={{ mb: 2, textAlign: 'center' }}>
+        Upload Certificate
+      </Typography>
+
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
+        <TextField
+          label="Owner"
           name="owner"
-          placeholder="Owner"
           value={formData.owner}
           onChange={handleChange}
+          fullWidth
           required
+          sx={{ mb: 2 }}
         />
-        <input
-          type="text"
+        <TextField
+          label="Institution"
           name="institution"
-          placeholder="Institution"
           value={formData.institution}
           onChange={handleChange}
+          fullWidth
           required
+          sx={{ mb: 2 }}
         />
-        <input
-          type="text"
+        <TextField
+          label="Certificate"
           name="certificate"
-          placeholder="Certificate"
           value={formData.certificate}
           onChange={handleChange}
+          fullWidth
           required
+          sx={{ mb: 2 }}
         />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Uploading...' : 'Upload Certificate'}
-        </button>
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          disabled={isLoading}
+          sx={{ mt: 2 }}
+        >
+          {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Upload Certificate'}
+        </Button>
       </form>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-    </div>
+
+      {errorMessage && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {errorMessage}
+        </Alert>
+      )}
+
+      {successMessage && (
+        <Alert severity="success" sx={{ mt: 2 }}>
+          {successMessage}
+        </Alert>
+      )}
+    </Box>
   );
 };
 
