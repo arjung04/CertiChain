@@ -6,6 +6,7 @@ class Blockchain:
     def __init__(self):
         self.chain = []
         self.current_data = []
+        
         # Create the genesis block
         self.new_block(previous_hash='1', proof=100)
         print("Genesis block created.")
